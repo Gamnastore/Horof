@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الفريق الاخضر </title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #24164e;
+        }
+        
+        .button-container {
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 255, 0, 0.2);
+            border: 2px solid rgba(0, 255, 0, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .button-container:hover {
+            transform: scale(1.05);
+            background-color: rgba(0, 255, 0, 0.3);
+        }
+        
+        .green-btn {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background-color: #00ff00;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .green-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: scale(0.95);
+        }
+        
+        .green-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        
+        .status {
+            margin-top: 30px;
+            font-size: 16px;
+            color: #aaa;
+        }
+        
+        .disabled-message {
+            margin-top: 20px;
+            color: #99ff99;
+            text-align: center;
+            max-width: 80%;
+            font-size: 14px;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <div class="button-container">
+        <button class="green-btn" id="greenBtn">أخضر</button>
+    </div>
+    <div class="disabled-message" id="disabledMessage"></div>
+    <div class="status" id="status">جاري الاتصال...</div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5quDLHdvY4FkQ4P2NxFvtlpqZNUBtRTk",
+            authDomain: "horror-f741a.firebaseapp.com",
+            databaseURL: "https://horror-f741a-default-rtdb.firebaseio.com",
+            projectId: "horror-f741a",
+            storageBucket: "horror-f741a.appspot.com",
+            messagingSenderId: "497946909060",
+            appId: "1:497946909060:web:420e6249b36a9bfe1565d1",
+            measurementId: "G-7N8ETTVBLK"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        const greenBtn = document.getElementById('greenBtn');
+        const statusEl = document.getElementById('status');
+        const disabledMessage = document.getElementById('disabledMessage');
+        
+        database.ref('lamp/color').on('value', (snapshot) => {
+            const color = snapshot.val();
+            greenBtn.disabled = !!color;
+            
+            if (color) {
+                disabledMessage.textContent = `اللمبة حالياً ${color === 'green' ? 'خضراء' : 'حمراء'}\nاضغط زر إعادة التعيين `;
+            } else {
+                disabledMessage.textContent = '';
+            }
+        });
+        
+        greenBtn.addEventListener('click', () => {
+            database.ref('lamp').set({ color: 'green' });
+        });
+        
+        const connectedRef = database.ref(".info/connected");
+        connectedRef.on("value", (snap) => {
+            statusEl.textContent = snap.val() ? "متصل" : "غير متصل";
+            statusEl.style.color = snap.val() ? "green" : "red";
+            greenBtn.disabled = !snap.val() || !!firebase.database().ref('lamp/color').value;
+        });
+    </script>
+</body>
+</html>

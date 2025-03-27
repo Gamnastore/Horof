@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المصباح المتزامن</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vh;
+            margin: 0;
+            background-color: #24164e;
+        }
+        
+        .lamp-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 40px;
+        }
+        
+        .lamp {
+            width: 200px;
+            height: 250px;
+            border-radius: 0%;
+            background-color: #ddd;
+            border: 0px solid #999;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .lamp.red {
+            background-color: #ff0000;
+            box-shadow: 0 0 30px 15px rgba(255, 0, 0, 0.6);
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        .lamp.green {
+            background-color: #00ff00;
+            box-shadow: 0 0 30px 15px rgba(0, 255, 0, 0.6);
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .reset-btn {
+            position: absolute;
+            bottom: 85px;
+            left: 95px;
+            transform: translateX(-50%);
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            font-size: 14px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            color: #333;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .lamp:hover .reset-btn {
+            opacity: 1;
+        }
+        
+        .reset-btn:hover {
+            background-color: white;
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 16px;
+            color: #aaa;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <div class="lamp-container">
+        <div class="lamp" id="lamp">
+            <button class="reset-btn" id="resetBtn">إعادة التعيين</button>
+        </div>
+    </div>
+    <div class="status" id="status">جاري الاتصال...</div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5quDLHdvY4FkQ4P2NxFvtlpqZNUBtRTk",
+            authDomain: "horror-f741a.firebaseapp.com",
+            databaseURL: "https://horror-f741a-default-rtdb.firebaseio.com",
+            projectId: "horror-f741a",
+            storageBucket: "horror-f741a.appspot.com",
+            messagingSenderId: "497946909060",
+            appId: "1:497946909060:web:420e6249b36a9bfe1565d1",
+            measurementId: "G-7N8ETTVBLK"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        const lamp = document.getElementById('lamp');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusEl = document.getElementById('status');
+        
+        // تعطيل زر إعادة التعيين في البداية
+        resetBtn.disabled = true;
+        
+        database.ref('lamp/color').on('value', (snapshot) => {
+            const color = snapshot.val();
+            lamp.className = color ? 'lamp ' + color : 'lamp';
+            resetBtn.disabled = !color;
+        });
+        
+        resetBtn.addEventListener('click', () => {
+            database.ref('lamp').set({ color: null });
+        });
+        
+        const connectedRef = database.ref(".info/connected");
+        connectedRef.on("value", (snap) => {
+            statusEl.textContent = snap.val() ? "متصل" : "غير متصل";
+            statusEl.style.color = snap.val() ? "green" : "red";
+        });
+    </script>
+</body>
+</html>
+
+<body scroll="no" style="overflow: hidden">
